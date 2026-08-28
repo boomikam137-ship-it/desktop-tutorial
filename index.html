@@ -3,602 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Goalify - Boomika Murugesan</title>
-
+    <title>Goalify | Adaptive Goal Engine</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN PAGE -->
+<section id="loginPage" class="login-page">
+    <div class="login-card">
+        <div class="logo">🌱 Goalify</div>
+        <h1>Welcome Back!</h1>
+        <p>Turn your dreams into achievable goals.</p>
 
-<div id="loginPage" class="login-page">
+        <input type="text" id="loginName" placeholder="Enter your name">
+        <input type="email" id="loginEmail" placeholder="Enter your email">
 
-    <div class="login-box">
+        <button onclick="login()">Login to Goalify</button>
 
-        <div class="logo">🎯</div>
+        <small>© 2026 Goalify</small>
+    </div>
+</section>
 
-        <h1>GOALIFY</h1>
 
-        <p>Turn Your Dreams Into Goals</p>
+<!-- MAIN WEBSITE -->
+<div id="mainWebsite" class="hidden">
 
-        <input
-            type="text"
-            id="loginName"
-            placeholder="Enter your name"
-        >
+<header>
+    <nav class="navbar">
 
-        <input
-            type="email"
-            id="loginEmail"
-            placeholder="Enter your email"
-        >
+        <div class="brand">
+            🌱 <span>Goalify</span>
+        </div>
 
-        <button onclick="login()">LOGIN</button>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#goals">Goals</a>
+            <a href="#progress">Progress</a>
+            <a href="#contact">Contact</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+
+    </nav>
+</header>
+
+
+<!-- HERO -->
+<section id="home" class="hero">
+
+    <div class="hero-content">
+
+        <span class="badge">✨ Adaptive Goal Engine</span>
+
+        <h1>
+            Save Today.<br>
+            <span>Achieve Tomorrow.</span>
+        </h1>
+
+        <p>
+            Goalify helps you plan, save and achieve your dreams
+            with smart daily saving guidance.
+        </p>
+
+        <button onclick="scrollToGoals()">Start Your Goal 🚀</button>
+
+    </div>
+
+    <div class="hero-tree">
+        🌳
+        <p>Your Goals Grow Here</p>
+    </div>
+
+</section>
+
+
+<!-- ABOUT -->
+<section id="about" class="section">
+
+    <h2>About Goalify</h2>
+
+    <p class="section-text">
+        Goalify is a smart personal savings platform designed to help
+        users create financial goals, track daily savings and finally
+        purchase their desired product after achieving the target.
+    </p>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            🎯
+            <h3>Smart Goals</h3>
+            <p>Create goals easily</p>
+        </div>
+
+        <div class="stat-card">
+            💰
+            <h3>Smart Savings</h3>
+            <p>Track your savings</p>
+        </div>
+
+        <div class="stat-card">
+            🛍️
+            <h3>Buy Goal</h3>
+            <p>Purchase after achieving</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FEATURES -->
+<section id="features" class="section light">
+
+    <h2>Powerful Features</h2>
+
+    <div class="feature-grid">
+
+        <div class="feature-card">
+            🎯
+            <h3>Goal Creation</h3>
+            <p>Set your dream product and target amount.</p>
+        </div>
+
+        <div class="feature-card">
+            💵
+            <h3>Daily Savings</h3>
+            <p>Choose how much you can save every day.</p>
+        </div>
+
+        <div class="feature-card">
+            🧠
+            <h3>Adaptive Alert</h3>
+            <p>Get alerts when your saving plan needs adjustment.</p>
+        </div>
+
+        <div class="feature-card">
+            🌳
+            <h3>Visual Tree</h3>
+            <p>Watch your goal grow as you save.</p>
+        </div>
+
+        <div class="feature-card">
+            💳
+            <h3>Payment</h3>
+            <p>Add your savings payment and track transactions.</p>
+        </div>
+
+        <div class="feature-card">
+            🛍️
+            <h3>Buy Now</h3>
+            <p>Purchase your goal after reaching 100%.</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- GOALS -->
+<section id="goals" class="section">
+
+    <h2>Create Your Goal</h2>
+
+    <div class="goal-form">
+
+        <input type="text" id="goalName"
+               placeholder="Goal name e.g. Bike, Mobile">
+
+        <input type="number" id="goalAmount"
+               placeholder="Target amount ₹">
+
+        <input type="number" id="dailySaving"
+               placeholder="Daily saving ₹">
+
+        <button onclick="createGoal()">
+            + Create Goal
+        </button>
+
+    </div>
+
+
+    <div id="alertBox"></div>
+
+
+    <div id="goalContainer"></div>
+
+</section>
+
+
+<!-- PROGRESS -->
+<section id="progress" class="section light">
+
+    <h2>Your Progress</h2>
+
+    <div class="progress-box">
+
+        <div class="big-progress" id="overallProgress">
+            0%
+        </div>
+
+        <h3>Keep Growing Your Dreams 🌱</h3>
+
+        <p id="progressText">
+            Create a goal to start your journey.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- HISTORY -->
+<section id="history" class="section">
+
+    <h2>Payment & Purchase History</h2>
+
+    <div id="historyContainer" class="history-container">
+        <p>No transactions yet.</p>
+    </div>
+
+</section>
+
+
+<!-- CONTACT -->
+<section id="contact" class="section contact-section">
+
+    <h2>Contact Us</h2>
+
+    <div class="contact-grid">
+
+        <div class="contact-card">
+            📧
+            <h3>Email</h3>
+            <p>boomikam137@gmail.com</p>
+        </div>
+
+        <div class="contact-card">
+            📞
+            <h3>Contact Us</h3>
+            <p>6383905764</p>
+        </div>
+
+        <div class="contact-card">
+            🆘
+            <h3>Help / Support</h3>
+            <p>Need help with your goal?</p>
+            <button onclick="support()">Get Support</button>
+        </div>
+
+        <div class="contact-card">
+            💬
+            <h3>Feedback</h3>
+            <textarea id="feedback"
+                      placeholder="Write your feedback..."></textarea>
+            <button onclick="sendFeedback()">Send Feedback</button>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+
+    <div class="footer-logo">
+        🌱 Goalify
+    </div>
+
+    <p>
+        Adaptive Goal Engine for smarter savings.
+    </p>
+
+    <p>
+        Created by <strong>BOOMIKA MURUGESAN</strong>
+    </p>
+
+    <p>
+        AVP College of Arts and Science
+    </p>
+
+    <p class="copyright">
+        © 2026 Goalify. All Rights Reserved.
+    </p>
+
+</footer>
+
+</div>
+
+<!-- PAYMENT MODAL -->
+<div id="paymentModal" class="modal">
+
+    <div class="modal-card">
+
+        <span class="close" onclick="closePayment()">×</span>
+
+        <h2>💳 Add Savings</h2>
+
+        <p id="paymentGoalName"></p>
+
+        <input type="number"
+               id="paymentAmount"
+               placeholder="Enter amount ₹">
+
+        <select id="paymentMethod">
+            <option value="">Select Payment Method</option>
+            <option>UPI</option>
+            <option>Cash</option>
+            <option>Bank Transfer</option>
+            <option>Card</option>
+        </select>
+
+        <button onclick="makePayment()">
+            Add Payment
+        </button>
 
     </div>
 
 </div>
 
 
-<!-- ================= MAIN WEBSITE ================= -->
+<!-- BUY MODAL -->
+<div id="buyModal" class="modal">
 
-<div id="mainWebsite" class="hidden">
+    <div class="modal-card">
 
-    <!-- NAVBAR -->
+        <span class="close" onclick="closeBuy()">×</span>
 
-    <nav>
+        <h2>🛍️ Buy Your Goal</h2>
 
-        <div class="nav-logo">
-            🎯 Goalify
-        </div>
+        <p id="buyGoalName"></p>
 
-        <div class="nav-links">
-
-            <a onclick="showSection('home')">Home</a>
-            <a onclick="showSection('about')">About</a>
-            <a onclick="showSection('features')">Features</a>
-            <a onclick="showSection('goals')">Goals</a>
-            <a onclick="showSection('progress')">Progress</a>
-            <a onclick="showSection('buy')">Buy</a>
-            <a onclick="showSection('history')">History</a>
-            <a onclick="logout()">Logout</a>
-
-        </div>
-
-    </nav>
-
-
-    <!-- ================= HOME ================= -->
-
-    <section id="home" class="section home">
-
-        <div class="hero">
-
-            <div>
-
-                <p class="small-title">
-                    WELCOME TO GOALIFY
-                </p>
-
-                <h1>
-                    Dream It.<br>
-                    <span>Save For It.</span><br>
-                    Achieve It.
-                </h1>
-
-                <p>
-                    A smart goal saving platform designed to
-                    help you achieve your dream products.
-                </p>
-
-                <button onclick="showSection('goals')">
-                    🚀 Set Your Goal
-                </button>
-
-            </div>
-
-            <div class="hero-card">
-
-                <div class="tree-big">🌳</div>
-
-                <h2>Grow Your Dreams</h2>
-
-                <p>
-                    Every saving adds a new leaf to your goal tree.
-                </p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= ABOUT ================= -->
-
-    <section id="about" class="section">
-
-        <div class="section-heading">
-
-            <span>💡</span>
-
-            <h2>About Goalify</h2>
-
-            <p>
-                Goalify helps you plan, save and purchase
-                the things you dream about.
-            </p>
-
-        </div>
-
-        <div class="info-grid">
-
-            <div class="info-card">
-                🎯
-                <h3>Set Goals</h3>
-                <p>Choose your dream product and target amount.</p>
-            </div>
-
-            <div class="info-card">
-                💰
-                <h3>Save Daily</h3>
-                <p>Set a daily saving amount and track it.</p>
-            </div>
-
-            <div class="info-card">
-                🌱
-                <h3>Grow Your Tree</h3>
-                <p>Your visual tree grows as you save.</p>
-            </div>
-
-            <div class="info-card">
-                🛍️
-                <h3>Buy Your Goal</h3>
-                <p>Complete your goal and purchase your dream.</p>
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= FEATURES ================= -->
-
-    <section id="features" class="section">
-
-        <div class="section-heading">
-
-            <span>✨</span>
-
-            <h2>Goalify Features</h2>
-
-        </div>
-
-        <div class="feature-grid">
-
-            <div class="feature-card">🎯 Smart Goal Planning</div>
-            <div class="feature-card">💰 Daily Saving Target</div>
-            <div class="feature-card">⏱️ Automatic Time Calculation</div>
-            <div class="feature-card">🌳 Visual Saving Tree</div>
-            <div class="feature-card">🛍️ Buy Your Goal</div>
-            <div class="feature-card">📜 Purchase History</div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= GOALS ================= -->
-
-    <section id="goals" class="section">
-
-        <div class="section-heading">
-
-            <span>🎯</span>
-
-            <h2>Create Your Goal</h2>
-
-            <p>Choose a product and start saving.</p>
-
-        </div>
-
-
-        <div class="goal-form">
-
-            <h3>Choose Your Dream</h3>
-
-            <div class="product-grid">
-
-                <button class="product-btn"
-                    onclick="selectProduct('Bike', 80000, this)">
-                    🏍️<br>Bike
-                </button>
-
-                <button class="product-btn"
-                    onclick="selectProduct('Mobile', 30000, this)">
-                    📱<br>Mobile
-                </button>
-
-                <button class="product-btn"
-                    onclick="selectProduct('Cycle', 15000, this)">
-                    🚲<br>Cycle
-                </button>
-
-                <button class="product-btn"
-                    onclick="selectProduct('Laptop', 60000, this)">
-                    💻<br>Laptop
-                </button>
-
-                <button class="product-btn"
-                    onclick="selectProduct('Electronics', 20000, this)">
-                    🎧<br>Electronics
-                </button>
-
-                <button class="product-btn"
-                    onclick="selectProduct('Other', 0, this)">
-                    🎁<br>Other
-                </button>
-
-            </div>
-
-
-            <input
-                type="text"
-                id="goalName"
-                placeholder="Goal name"
-            >
-
-            <input
-                type="number"
-                id="goalAmount"
-                placeholder="Target amount ₹"
-            >
-
-            <input
-                type="number"
-                id="dailyAmount"
-                placeholder="Daily saving ₹"
-            >
-
-            <button onclick="createGoal()">
-                💾 Save Goal
-            </button>
-
-        </div>
-
-
-        <div id="goalList" class="goal-list"></div>
-
-    </section>
-
-
-    <!-- ================= PROGRESS ================= -->
-
-    <section id="progress" class="section">
-
-        <div class="section-heading">
-
-            <span>🌳</span>
-
-            <h2>Your Goal Progress</h2>
-
-        </div>
-
-        <div id="progressContainer">
-
-            <p class="no-data">
-                Create a goal to see your progress.
-            </p>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= BUY ================= -->
-
-    <section id="buy" class="section">
-
-        <div class="section-heading">
-
-            <span>🛍️</span>
-
-            <h2>Choose & Buy Your Goal</h2>
-
-            <p>
-                Complete your saving goal and purchase it.
-            </p>
-
-        </div>
-
-
-        <div class="buy-box">
-
-            <label>Select Goal</label>
-
-            <select id="buyGoal"
-                    onchange="showBuyDetails()">
-
-                <option value="">
-                    -- Select Goal --
-                </option>
-
-            </select>
-
-
-            <div id="buyDetails" class="buy-details">
-
-                Select a goal to continue.
-
-            </div>
-
-
-            <button
-                class="buy-button"
-                onclick="buyGoal()">
-
-                🛒 BUY NOW
-
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= PAYMENT ================= -->
-
-    <section id="payment" class="section">
-
-        <div class="section-heading">
-
-            <span>💳</span>
-
-            <h2>Payment</h2>
-
-            <p>Choose your payment method.</p>
-
-        </div>
-
-
-        <div class="payment-box">
-
-            <h3 id="paymentGoalName">
-                Payment
-            </h3>
-
-            <h2 id="paymentAmount">
-                ₹0
-            </h2>
-
-
-            <div class="payment-options">
-
-                <label>
-                    <input
-                        type="radio"
-                        name="payment"
-                        value="UPI"
-                        checked
-                        onchange="changePayment()"
-                    >
-                    📱 UPI
-                </label>
-
-                <label>
-                    <input
-                        type="radio"
-                        name="payment"
-                        value="Card"
-                        onchange="changePayment()"
-                    >
-                    💳 Card
-                </label>
-
-                <label>
-                    <input
-                        type="radio"
-                        name="payment"
-                        value="Cash"
-                        onchange="changePayment()"
-                    >
-                    💵 Cash
-                </label>
-
-            </div>
-
-
-            <div id="upiInput">
-
-                <input
-                    type="text"
-                    id="upi"
-                    placeholder="Enter UPI ID"
-                >
-
-            </div>
-
-
-            <div id="cardInput" class="hidden">
-
-                <input
-                    type="text"
-                    placeholder="Card Number"
-                    maxlength="16"
-                >
-
-                <div class="card-row">
-
-                    <input
-                        type="text"
-                        placeholder="MM/YY"
-                    >
-
-                    <input
-                        type="password"
-                        placeholder="CVV"
-                        maxlength="3"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <button onclick="confirmPayment()">
-                ✅ CONFIRM PAYMENT
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= HISTORY ================= -->
-
-    <section id="history" class="section">
-
-        <div class="section-heading">
-
-            <span>📜</span>
-
-            <h2>Purchase History</h2>
-
-        </div>
-
-        <div id="historyList">
-
-            <p class="no-data">
-                No purchases yet.
-            </p>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= CONTACT ================= -->
-
-    <section id="contact" class="section">
-
-        <div class="section-heading">
-
-            <span>📞</span>
-
-            <h2>Contact Us</h2>
-
-            <p>
-                Need help? We are here for you.
-            </p>
-
-        </div>
-
-
-        <div class="contact-grid">
-
-            <div class="contact-card">
-
-                📧
-
-                <h3>Email</h3>
-
-                <p>
-                    boomikam137@gmail.com
-                </p>
-
-            </div>
-
-
-            <div class="contact-card">
-
-                📱
-
-                <h3>Contact</h3>
-
-                <p>
-                    6383905764
-                </p>
-
-            </div>
-
-
-            <div class="contact-card">
-
-                🆘
-
-                <h3>Help & Support</h3>
-
-                <p>
-                    Get help with your goals.
-                </p>
-
-            </div>
-
-
-            <div class="contact-card">
-
-                💬
-
-                <h3>Feedback</h3>
-
-                <textarea
-                    id="feedback"
-                    placeholder="Write your feedback..."
-                ></textarea>
-
-                <button onclick="sendFeedback()">
-                    Send Feedback
-                </button>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= FOOTER ================= -->
-
-    <footer>
-
-        <h2>🎯 GOALIFY</h2>
-
-        <p>
-            Designed & Developed by
-            <strong>Boomika Murugesan</strong>
+        <p class="success-text">
+            🎉 Congratulations! Your goal is 100% complete.
         </p>
 
-        <p>
-            AVP College of Arts and Science
-        </p>
+        <input type="text"
+               id="buyAddress"
+               placeholder="Enter delivery address">
 
-        <p>
-            © 2026 Goalify. All Rights Reserved.
-        </p>
+        <select id="buyPayment">
+            <option>Select purchase payment</option>
+            <option>UPI</option>
+            <option>Card</option>
+            <option>Cash on Delivery</option>
+        </select>
 
-    </footer>
-
-</div>
-
-
-<!-- SUCCESS POPUP -->
-
-<div id="popup" class="popup">
-
-    <div class="popup-box">
-
-        <div class="success">🎉</div>
-
-        <h2 id="popupTitle">
-            Success!
-        </h2>
-
-        <p id="popupMessage"></p>
-
-        <button onclick="closePopup()">
-            OK
+        <button onclick="purchaseGoal()">
+            Confirm Purchase 🛍️
         </button>
 
     </div>

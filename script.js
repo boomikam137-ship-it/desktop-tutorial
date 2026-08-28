@@ -1,1037 +1,626 @@
-/* =========================================
-   GOALIFY JAVASCRIPT
-========================================= */
-
-let goals = JSON.parse(
-    localStorage.getItem("goalifyGoals")
-) || [];
-
-let purchases = JSON.parse(
-    localStorage.getItem("goalifyPurchases")
-) || [];
-
-let selectedProduct = "";
-
-let selectedBuyIndex = null;
+let currentGoal = null;
+let transactions = [];
+let loggedIn = false;
 
 
-/* =========================================
-   LOGIN
-========================================= */
+// LOGIN
 
 function login() {
 
-    let name =
-        document.getElementById("loginName").value.trim();
+    const name = document.getElementById("loginName").value.trim();
+    const email = document.getElementById("loginEmail").value.trim();
 
-    let email =
-        document.getElementById("loginEmail").value.trim();
-
-    if (name === "") {
-
-        alert("Please enter your name.");
-
+    if (name === "" || email === "") {
+        alert("Please enter your name and email.");
         return;
     }
 
-    if (email === "" || !email.includes("@")) {
+    loggedIn = true;
 
-        alert("Please enter a valid email.");
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("mainWebsite").classList.remove("hidden");
 
-        return;
-    }
+    document.querySelector(".brand span").textContent = "Goalify";
 
     localStorage.setItem("goalifyUser", name);
-
-    document.getElementById("loginPage")
-        .classList.add("hidden");
-
-    document.getElementById("mainWebsite")
-        .classList.remove("hidden");
-
-    showSection("home");
-
-    displayGoals();
-
-    displayProgress();
-
-    loadBuyGoals();
-
-    displayHistory();
-
+    localStorage.setItem("goalifyEmail", email);
 }
 
 
-/* =========================================
-   LOGOUT
-========================================= */
+// LOGOUT
 
 function logout() {
 
-    document.getElementById("mainWebsite")
-        .classList.add("hidden");
+    loggedIn = false;
 
-    document.getElementById("loginPage")
-        .classList.remove("hidden");
-
+    document.getElementById("mainWebsite").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
 }
 
 
-/* =========================================
-   SECTION NAVIGATION
-========================================= */
+// SCROLL
 
-function showSection(id) {
+function scrollToGoals() {
 
-    const section =
-        document.getElementById(id);
-
-    if (!section) return;
-
-    section.scrollIntoView({
-        behavior: "smooth"
-    });
-
+    document.getElementById("goals")
+        .scrollIntoView({ behavior: "smooth" });
 }
 
 
-/* =========================================
-   SELECT PRODUCT
-========================================= */
-
-function selectProduct(name, amount, button) {
-
-    selectedProduct = name;
-
-    document.querySelectorAll(".product-btn")
-        .forEach(btn => {
-
-            btn.classList.remove("active");
-
-        });
-
-    button.classList.add("active");
-
-    document.getElementById("goalName").value =
-        name;
-
-    if (amount > 0) {
-
-        document.getElementById("goalAmount").value =
-            amount;
-
-    }
-
-}
-
-
-/* =========================================
-   CREATE GOAL
-========================================= */
+// CREATE GOAL
 
 function createGoal() {
 
-    let name =
-        document.getElementById("goalName")
-            .value.trim();
-
-    let amount =
-        Number(
-            document.getElementById("goalAmount")
-                .value
-        );
-
-    let daily =
-        Number(
-            document.getElementById("dailyAmount")
-                .value
-        );
-
-
-    if (name === "") {
-
-        alert("Please choose or enter a goal.");
-
+    if (!loggedIn) {
+        alert("Please login first.");
         return;
     }
 
-    if (amount <= 0) {
+    const name =
+        document.getElementById("goalName").value.trim();
 
-        alert("Please enter a valid target amount.");
+    const target =
+        Number(document.getElementById("goalAmount").value);
 
-        return;
-    }
+    const daily =
+        Number(document.getElementById("dailySaving").value);
 
-    if (daily <= 0) {
 
-        alert("Please enter your daily saving amount.");
+    if (name === "" || target <= 0 || daily <= 0) {
 
+        alert("Please enter valid goal details.");
         return;
     }
 
 
-    /* TIME CALCULATION */
+    const days = Math.ceil(target / daily);
 
-    let days =
-        Math.ceil(amount / daily);
-
-
-    let months =
-        Math.floor(days / 30);
-
-    let remainingDays =
-        days % 30;
-
-
-    let timeText = "";
-
-    if (months > 0) {
-
-        timeText +=
-            months + " month";
-
-        if (months > 1)
-            timeText += "s";
-
-    }
-
-    if (remainingDays > 0) {
-
-        if (timeText !== "")
-            timeText += " ";
-
-        timeText +=
-            remainingDays + " day";
-
-        if (remainingDays > 1)
-            timeText += "s";
-
-    }
-
-
-    let goal = {
+    currentGoal = {
 
         name: name,
-
-        amount: amount,
-
+        target: target,
         daily: daily,
-
         saved: 0,
-
         days: days,
-
-        time: timeText,
-
-        created:
-            new Date().toLocaleDateString(),
-
-        completed: false
+        created: new Date().toLocaleDateString()
 
     };
 
 
-    goals.push(goal);
+    document.getElementById("goalName").value = "";
+    document.getElementById("goalAmount").value = "";
+    document.getElementById("dailySaving").value = "";
 
 
-    localStorage.setItem(
-        "goalifyGoals",
-        JSON.stringify(goals)
-    );
+    showAdaptiveAlert();
 
+    renderGoal();
 
-    /* CLEAR FORM */
-
-    document.getElementById("goalName")
-        .value = "";
-
-    document.getElementById("goalAmount")
-        .value = "";
-
-    document.getElementById("dailyAmount")
-        .value = "";
-
-
-    document.querySelectorAll(".product-btn")
-        .forEach(btn => {
-
-            btn.classList.remove("active");
-
-        });
-
-
-    displayGoals();
-
-    displayProgress();
-
-    loadBuyGoals();
-
-
-    showPopup(
-        "Goal Created 🎯",
-        `${name} goal created successfully! 
-         You need approximately ${timeText}.`
-    );
+    updateProgress();
 
 }
 
 
-/* =========================================
-   DISPLAY GOALS
-========================================= */
+// ADAPTIVE ALERT
 
-function displayGoals() {
+function showAdaptiveAlert() {
 
-    let container =
-        document.getElementById("goalList");
+    const alertBox =
+        document.getElementById("alertBox");
 
-    container.innerHTML = "";
+    const target = currentGoal.target;
+    const daily = currentGoal.daily;
+
+    const days = currentGoal.days;
 
 
-    if (goals.length === 0) {
+    if (target >= 50000 && days <= 180) {
 
-        container.innerHTML =
-            `<p class="no-data">
-                No goals created yet.
-             </p>`;
+        alertBox.innerHTML = `
+            <div class="alert">
+                ⚡ Smart Alert: Your target amount is high
+                and your saving period is short.
+                Consider increasing your daily saving amount.
+            </div>
+        `;
 
-        return;
     }
 
+    else if (daily < target / 365) {
 
-    goals.forEach((goal, index) => {
+        alertBox.innerHTML = `
+            <div class="alert">
+                💡 Smart Suggestion: Your current daily saving
+                may take a long time. Try increasing it.
+            </div>
+        `;
 
-        let percent =
-            Math.min(
-                (goal.saved / goal.amount) * 100,
-                100
-            );
+    }
+
+    else {
+
+        alertBox.innerHTML = `
+            <div class="alert">
+                🌱 Great plan! Your daily saving strategy
+                is ready to grow your goal.
+            </div>
+        `;
+    }
+}
 
 
-        let card =
-            document.createElement("div");
+// RENDER GOAL
 
-        card.className =
-            "goal-card";
+function renderGoal() {
+
+    const container =
+        document.getElementById("goalContainer");
 
 
-        card.innerHTML = `
+    const percentage =
+        Math.min(
+            100,
+            (currentGoal.saved / currentGoal.target) * 100
+        );
+
+
+    let tree = "🌱";
+
+    if (percentage >= 25)
+        tree = "🌿";
+
+    if (percentage >= 50)
+        tree = "🌳";
+
+    if (percentage >= 75)
+        tree = "🌲";
+
+    if (percentage >= 100)
+        tree = "🌳🌟";
+
+
+    const remaining =
+        Math.max(
+            0,
+            currentGoal.target - currentGoal.saved
+        );
+
+
+    const estimatedRemainingDays =
+        remaining > 0
+        ? Math.ceil(remaining / currentGoal.daily)
+        : 0;
+
+
+    container.innerHTML = `
+
+        <div class="goal-card">
 
             <div class="goal-top">
 
-                <h3>🎯 ${goal.name}</h3>
+                <div class="goal-title">
+                    🎯 ${currentGoal.name}
+                </div>
 
                 <strong>
-                    ${percent.toFixed(0)}%
+                    ${percentage.toFixed(0)}%
                 </strong>
 
             </div>
 
-            <p>
-                Target: ₹${goal.amount}
-            </p>
 
-            <p>
-                Saved: ₹${goal.saved}
-            </p>
+            <div class="goal-info">
+
+                <p>
+                    Target:
+                    <strong>₹${currentGoal.target.toLocaleString()}</strong>
+                </p>
+
+                <p>
+                    Saved:
+                    <strong>₹${currentGoal.saved.toLocaleString()}</strong>
+                </p>
+
+                <p>
+                    Remaining:
+                    <strong>₹${remaining.toLocaleString()}</strong>
+                </p>
+
+                <p>
+                    Daily Saving:
+                    <strong>₹${currentGoal.daily}</strong>
+                </p>
+
+                <p>
+                    Estimated Time:
+                    <strong>${currentGoal.days} days</strong>
+                </p>
+
+                <p>
+                    Remaining Time:
+                    <strong>${estimatedRemainingDays} days</strong>
+                </p>
+
+            </div>
+
 
             <div class="progress-bar">
 
                 <div
                     class="progress-fill"
-                    style="width:${percent}%">
+                    style="width:${percentage}%">
                 </div>
 
             </div>
 
-            <p>
-                💰 Daily Target:
-                ₹${goal.daily}/day
-            </p>
 
-            <p>
-                ⏱️ Estimated Time:
-                ${goal.time}
-            </p>
+            <div class="tree-area">
 
-        `;
+                <div class="tree">
+                    ${tree}
+                </div>
 
+                <div class="tree-message">
 
-        container.appendChild(card);
+                    ${
+                        percentage >= 100
+                        ? "🎉 Goal Achieved! Your dream is ready!"
+                        : "Keep saving — your tree is growing!"
+                    }
 
-    });
-
-}
-
-
-/* =========================================
-   PROGRESS / TREE
-========================================= */
-
-function displayProgress() {
-
-    let container =
-        document.getElementById(
-            "progressContainer"
-        );
-
-    container.innerHTML = "";
-
-
-    if (goals.length === 0) {
-
-        container.innerHTML =
-            `<p class="no-data">
-                Create a goal to see your progress.
-             </p>`;
-
-        return;
-    }
-
-
-    goals.forEach((goal, index) => {
-
-        let percent =
-            Math.min(
-                (goal.saved / goal.amount) * 100,
-                100
-            );
-
-
-        let treeEmoji = "🌱";
-
-
-        if (percent >= 25)
-            treeEmoji = "🌿";
-
-        if (percent >= 50)
-            treeEmoji = "🌳";
-
-        if (percent >= 75)
-            treeEmoji = "🌲";
-
-        if (percent >= 100)
-            treeEmoji = "🌳✨";
-
-
-        let card =
-            document.createElement("div");
-
-        card.className =
-            "progress-card";
-
-
-        card.innerHTML = `
-
-            <h2>
-                ${goal.name}
-            </h2>
-
-            <div class="tree">
-                ${treeEmoji}
-            </div>
-
-            <h3>
-                ${percent.toFixed(0)}% Completed
-            </h3>
-
-            <p>
-                ₹${goal.saved}
-                / ₹${goal.amount}
-            </p>
-
-            <div class="progress-bar">
-
-                <div
-                    class="progress-fill"
-                    style="width:${percent}%">
                 </div>
 
             </div>
 
-            ${
-                percent >= 100
 
-                ? `<h3 style="color:#00b894">
-                     🎉 Goal Achieved!
-                   </h3>`
+            <div class="goal-actions">
 
-                : `
+                <button onclick="openPayment()">
+                    💳 Add Payment
+                </button>
 
-                    <p>
-                        Add your savings
-                    </p>
 
-                    <div class="save-buttons">
+                ${
+                    percentage >= 100
 
-                        <button
-                            onclick="addSaving(${index},30)">
-                            + ₹30
-                        </button>
+                    ?
 
-                        <button
-                            onclick="addSaving(${index},100)">
-                            + ₹100
-                        </button>
+                    `<button
+                        class="buy-btn"
+                        onclick="openBuy()">
+                        🛍️ Buy Now
+                    </button>`
 
-                        <button
-                            onclick="addSaving(${index},${goal.daily})">
-                            Daily ₹${goal.daily}
-                        </button>
+                    :
 
-                    </div>
+                    `<button
+                        class="disabled-btn"
+                        disabled>
+                        🔒 Buy Now
+                    </button>`
+                }
 
-                  `
-            }
+            </div>
 
-        `;
-
-
-        container.appendChild(card);
-
-    });
-
-}
-
-
-/* =========================================
-   ADD SAVING
-========================================= */
-
-function addSaving(index, amount) {
-
-    let goal = goals[index];
-
-
-    if (goal.saved >= goal.amount) {
-
-        alert("🎉 This goal is already completed!");
-
-        return;
-    }
-
-
-    goal.saved += amount;
-
-
-    if (goal.saved >= goal.amount) {
-
-        goal.saved = goal.amount;
-
-        goal.completed = true;
-
-        showPopup(
-            "🎉 Goal Achieved!",
-            `${goal.name} goal is completed! 
-             You can now buy your goal.`
-        );
-
-    }
-
-
-    localStorage.setItem(
-        "goalifyGoals",
-        JSON.stringify(goals)
-    );
-
-
-    displayGoals();
-
-    displayProgress();
-
-    loadBuyGoals();
-
-}
-
-
-/* =========================================
-   BUY GOAL LIST
-========================================= */
-
-function loadBuyGoals() {
-
-    let select =
-        document.getElementById("buyGoal");
-
-
-    select.innerHTML =
-        `<option value="">
-            -- Select Goal --
-         </option>`;
-
-
-    goals.forEach((goal, index) => {
-
-        let option =
-            document.createElement("option");
-
-        option.value = index;
-
-        option.textContent =
-            `${goal.name} - ₹${goal.amount}`;
-
-        select.appendChild(option);
-
-    });
-
-}
-
-
-/* =========================================
-   BUY DETAILS
-========================================= */
-
-function showBuyDetails() {
-
-    let select =
-        document.getElementById("buyGoal");
-
-    let index = select.value;
-
-    let details =
-        document.getElementById("buyDetails");
-
-
-    if (index === "") {
-
-        details.innerHTML =
-            "Select a goal to continue.";
-
-        return;
-    }
-
-
-    let goal = goals[index];
-
-
-    let completed =
-        goal.saved >= goal.amount;
-
-
-    details.innerHTML = `
-
-        <h3>🎯 ${goal.name}</h3>
-
-        <p>
-            💰 Target:
-            <strong>₹${goal.amount}</strong>
-        </p>
-
-        <p>
-            💵 Saved:
-            <strong>₹${goal.saved}</strong>
-        </p>
-
-        <p>
-            📊 Progress:
-            <strong>
-                ${Math.min(
-                    (goal.saved / goal.amount) * 100,
-                    100
-                ).toFixed(0)}%
-            </strong>
-        </p>
-
-        <p>
-            ${
-                completed
-                ? "✅ Ready to Purchase"
-                : "⚠️ Goal not completed yet"
-            }
-        </p>
-
+        </div>
     `;
-
 }
 
 
-/* =========================================
-   BUY NOW
-========================================= */
+// PAYMENT MODAL
 
-function buyGoal() {
+function openPayment() {
 
-    let select =
-        document.getElementById("buyGoal");
+    if (!currentGoal) {
+        alert("Create a goal first.");
+        return;
+    }
 
-    let index = select.value;
+    document.getElementById("paymentGoalName")
+        .textContent =
+        "Saving for: " + currentGoal.name;
+
+    document.getElementById("paymentModal")
+        .style.display = "flex";
+}
 
 
-    if (index === "") {
+function closePayment() {
 
-        alert("⚠️ Please select a goal.");
+    document.getElementById("paymentModal")
+        .style.display = "none";
+}
 
+
+// MAKE PAYMENT
+
+function makePayment() {
+
+    const amount =
+        Number(
+            document.getElementById("paymentAmount").value
+        );
+
+    const method =
+        document.getElementById("paymentMethod").value;
+
+
+    if (amount <= 0 || method === "") {
+
+        alert("Enter amount and payment method.");
         return;
     }
 
 
-    let goal = goals[index];
-
-
-    /*
-       IMPORTANT:
-       User can only buy after
-       reaching target amount.
-    */
-
-    if (goal.saved < goal.amount) {
+    if (currentGoal.saved + amount > currentGoal.target) {
 
         alert(
-            `⚠️ Goal not completed yet!\n\n` +
-            `You need ₹${goal.amount - goal.saved} more.`
+            "Payment exceeds your remaining goal amount."
         );
 
         return;
     }
 
 
-    selectedBuyIndex =
-        Number(index);
+    currentGoal.saved += amount;
 
 
-    document.getElementById(
-        "paymentGoalName"
-    ).textContent =
-        "🛍️ " + goal.name;
+    transactions.unshift({
+
+        type: "Payment",
+        goal: currentGoal.name,
+        amount: amount,
+        method: method,
+        date: new Date().toLocaleString()
+
+    });
 
 
-    document.getElementById(
-        "paymentAmount"
-    ).textContent =
-        "₹" + goal.amount;
+    document.getElementById("paymentAmount").value = "";
+
+    document.getElementById("paymentMethod").value = "";
 
 
-    showSection("payment");
+    closePayment();
 
+    renderGoal();
+
+    updateProgress();
+
+    renderHistory();
+
+
+    if (currentGoal.saved === currentGoal.target) {
+
+        alert(
+            "🎉 Congratulations! Goal achieved. You can now Buy Now!"
+        );
+
+    } else {
+
+        alert(
+            `₹${amount} added successfully! Keep growing 🌱`
+        );
+
+    }
 }
 
 
-/* =========================================
-   PAYMENT METHOD
-========================================= */
+// BUY MODAL
 
-function changePayment() {
+function openBuy() {
 
-    let method =
-        document.querySelector(
-            'input[name="payment"]:checked'
-        ).value;
+    if (currentGoal.saved < currentGoal.target) {
 
-
-    document.getElementById("upiInput")
-        .classList.add("hidden");
-
-    document.getElementById("cardInput")
-        .classList.add("hidden");
-
-
-    if (method === "UPI") {
-
-        document.getElementById("upiInput")
-            .classList.remove("hidden");
-
-    }
-
-
-    if (method === "Card") {
-
-        document.getElementById("cardInput")
-            .classList.remove("hidden");
-
-    }
-
-}
-
-
-/* =========================================
-   CONFIRM PAYMENT
-========================================= */
-
-function confirmPayment() {
-
-    if (selectedBuyIndex === null) {
-
-        alert("Please select a goal first.");
+        alert(
+            "Complete your savings goal before purchasing."
+        );
 
         return;
     }
 
 
-    let goal =
-        goals[selectedBuyIndex];
+    document.getElementById("buyGoalName")
+        .textContent =
+        "Product: " + currentGoal.name;
 
 
-    let method =
-        document.querySelector(
-            'input[name="payment"]:checked'
-        ).value;
+    document.getElementById("buyModal")
+        .style.display = "flex";
+}
 
 
-    /* UPI */
+function closeBuy() {
 
-    if (method === "UPI") {
-
-        let upi =
-            document.getElementById("upi")
-                .value.trim();
+    document.getElementById("buyModal")
+        .style.display = "none";
+}
 
 
-        if (upi === "") {
+// PURCHASE
 
-            alert("Please enter your UPI ID.");
+function purchaseGoal() {
 
-            return;
-        }
+    const address =
+        document.getElementById("buyAddress").value.trim();
 
+    const payment =
+        document.getElementById("buyPayment").value;
+
+
+    if (address === "" ||
+        payment === "Select purchase payment") {
+
+        alert(
+            "Please enter delivery address and payment method."
+        );
+
+        return;
     }
 
 
-    /* CARD */
+    transactions.unshift({
 
-    if (method === "Card") {
+        type: "Purchase",
+        goal: currentGoal.name,
+        amount: currentGoal.target,
+        method: payment,
+        date: new Date().toLocaleString()
 
-        let cardInputs =
-            document.querySelectorAll(
-                "#cardInput input"
-            );
-
-
-        for (
-            let input of cardInputs
-        ) {
-
-            if (input.value.trim() === "") {
-
-                alert(
-                    "Please fill all card details."
-                );
-
-                return;
-            }
-
-        }
-
-    }
+    });
 
 
-    /* PURCHASE */
+    closeBuy();
 
-    let purchase = {
-
-        goal:
-            goal.name,
-
-        amount:
-            goal.amount,
-
-        payment:
-            method,
-
-        date:
-            new Date().toLocaleString(),
-
-        status:
-            "Purchased"
-
-    };
+    renderHistory();
 
 
-    purchases.push(purchase);
-
-
-    localStorage.setItem(
-        "goalifyPurchases",
-        JSON.stringify(purchases)
+    alert(
+        "🛍️ Purchase confirmed successfully! 🎉"
     );
-
-
-    displayHistory();
-
-
-    showPopup(
-        "🎉 Purchase Successful!",
-        `${goal.name} purchased successfully!\n\n` +
-        `Amount: ₹${goal.amount}\n` +
-        `Payment: ${method}`
-    );
-
-
-    selectedBuyIndex = null;
 
 }
 
 
-/* =========================================
-   HISTORY
-========================================= */
+// HISTORY
 
-function displayHistory() {
+function renderHistory() {
 
-    let container =
-        document.getElementById(
-            "historyList"
-        );
+    const container =
+        document.getElementById("historyContainer");
 
 
-    if (purchases.length === 0) {
+    if (transactions.length === 0) {
 
         container.innerHTML =
-            `<p class="no-data">
-                📜 No purchases yet.
-             </p>`;
+            "<p>No transactions yet.</p>";
 
         return;
     }
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        transactions.map(item => `
 
-
-    purchases
-        .slice()
-        .reverse()
-        .forEach(purchase => {
-
-            let item =
-                document.createElement("div");
-
-            item.className =
-                "history-item";
-
-
-            item.innerHTML = `
+            <div class="history-item">
 
                 <div>
 
-                    <h3>
-                        🛍️ ${purchase.goal}
-                    </h3>
+                    ${
+                        item.type === "Payment"
+                        ? "💳"
+                        : "🛍️"
+                    }
 
-                    <p>
-                        💰 ₹${purchase.amount}
-                    </p>
+                    <strong>
+                        ${item.type}
+                    </strong>
 
-                    <p>
-                        💳 ${purchase.payment}
-                    </p>
-
-                    <p>
-                        📅 ${purchase.date}
-                    </p>
+                    — ${item.goal}
 
                 </div>
 
-                <div class="purchased">
-                    ✓ PURCHASED
+
+                <div>
+                    ₹${item.amount.toLocaleString()}
                 </div>
 
-            `;
+
+                <div>
+                    ${item.method}
+                </div>
 
 
-            container.appendChild(item);
+                <div>
+                    ${item.date}
+                </div>
 
-        });
+            </div>
+
+        `).join("");
+}
+
+
+// OVERALL PROGRESS
+
+function updateProgress() {
+
+    if (!currentGoal) {
+
+        document.getElementById("overallProgress")
+            .textContent = "0%";
+
+        document.getElementById("progressText")
+            .textContent =
+            "Create a goal to start your journey.";
+
+        return;
+    }
+
+
+    const percentage =
+        Math.min(
+            100,
+            (currentGoal.saved /
+                currentGoal.target) * 100
+        );
+
+
+    document.getElementById("overallProgress")
+        .textContent =
+        percentage.toFixed(0) + "%";
+
+
+    document.getElementById("progressText")
+        .textContent =
+        `₹${currentGoal.saved.toLocaleString()} saved out of ₹${currentGoal.target.toLocaleString()}.`;
+}
+
+
+// SUPPORT
+
+function support() {
+
+    alert(
+        "🆘 Goalify Support\n\n" +
+        "Email: boomikam137@gmail.com\n" +
+        "Contact: 6383905764"
+    );
 
 }
 
 
-/* =========================================
-   FEEDBACK
-========================================= */
+// FEEDBACK
 
 function sendFeedback() {
 
-    let feedback =
-        document.getElementById(
-            "feedback"
-        ).value.trim();
+    const feedback =
+        document.getElementById("feedback")
+            .value.trim();
 
 
     if (feedback === "") {
 
-        alert("Please write your feedback.");
+        alert("Please enter your feedback.");
 
         return;
     }
 
 
-    document.getElementById(
-        "feedback"
-    ).value = "";
-
-
-    showPopup(
-        "💬 Thank You!",
-        "Your feedback has been submitted successfully."
+    alert(
+        "💚 Thank you for your valuable feedback!"
     );
 
-}
 
-
-/* =========================================
-   POPUP
-========================================= */
-
-function showPopup(title, message) {
-
-    document.getElementById(
-        "popupTitle"
-    ).textContent = title;
-
-
-    document.getElementById(
-        "popupMessage"
-    ).textContent = message;
-
-
-    document.getElementById(
-        "popup"
-    ).classList.add("show");
+    document.getElementById("feedback").value = "";
 
 }
 
 
-function closePopup() {
+// PAGE LOAD
 
-    document.getElementById(
-        "popup"
-    ).classList.remove("show");
+window.onload = function() {
 
-}
-
-
-/* =========================================
-   AUTO LOGIN
-========================================= */
-
-window.onload = function () {
-
-    let user =
-        localStorage.getItem(
-            "goalifyUser"
-        );
-
-
-    if (user) {
-
-        document.getElementById(
-            "loginPage"
-        ).classList.add("hidden");
-
-
-        document.getElementById(
-            "mainWebsite"
-        ).classList.remove("hidden");
-
-
-        displayGoals();
-
-        displayProgress();
-
-        loadBuyGoals();
-
-        displayHistory();
-
-    }
+    renderHistory();
 
 };
